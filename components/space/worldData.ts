@@ -1,7 +1,7 @@
 import { DistantObject, MoonConfig, OrbitalBody } from "./types";
 
-export const WORLD_UNITS_PER_AU = 4;
-export const AU_PER_LIGHT_YEAR = 63241;
+export const WORLD_UNITS_PER_AU = 500;
+export const AU_PER_LIGHT_YEAR = 10000;
 
 export const sun = {
   id: "sun",
@@ -22,8 +22,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "mercury",
     name: "Mercury",
-    radius: 18,
-    size: 1.5,
+    radius: 500,
+    size: 60,
     color: "#b5b5b5",
     orbitSpeed: 0.12,
     style: "rocky",
@@ -38,8 +38,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "venus",
     name: "Venus",
-    radius: 26,
-    size: 2.8,
+    radius: 800,
+    size: 90,
     color: "#d9a066",
     orbitSpeed: 0.095,
     style: "cloudy",
@@ -54,8 +54,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "earth",
     name: "Earth",
-    radius: 36,
-    size: 3.1,
+    radius: 1100,
+    size: 96,
     color: "#4b8df8",
     orbitSpeed: 0.08,
     style: "cloudy",
@@ -70,8 +70,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "mars",
     name: "Mars",
-    radius: 47,
-    size: 2.3,
+    radius: 1500,
+    size: 78,
     color: "#c45a3a",
     orbitSpeed: 0.065,
     style: "rocky",
@@ -86,8 +86,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "jupiter",
     name: "Jupiter",
-    radius: 67,
-    size: 6.8,
+    radius: 2300,
+    size: 190,
     color: "#d2b08a",
     orbitSpeed: 0.045,
     style: "banded",
@@ -102,8 +102,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "saturn",
     name: "Saturn",
-    radius: 91,
-    size: 6.1,
+    radius: 3200,
+    size: 170,
     color: "#e4c88b",
     orbitSpeed: 0.036,
     style: "banded",
@@ -118,8 +118,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "uranus",
     name: "Uranus",
-    radius: 116,
-    size: 4.5,
+    radius: 4300,
+    size: 130,
     color: "#8bd9dc",
     orbitSpeed: 0.028,
     style: "ice",
@@ -134,8 +134,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "neptune",
     name: "Neptune",
-    radius: 142,
-    size: 4.2,
+    radius: 5200,
+    size: 126,
     color: "#4a7bd2",
     orbitSpeed: 0.023,
     style: "ice",
@@ -150,8 +150,8 @@ export const planets: OrbitalBody[] = [
   {
     id: "pluto",
     name: "Pluto",
-    radius: 172,
-    size: 1.5,
+    radius: 6000,
+    size: 55,
     color: "#ceb9a2",
     orbitSpeed: 0.018,
     style: "rocky",
@@ -170,8 +170,8 @@ export const moons: MoonConfig[] = [
     id: "europa",
     parentId: "jupiter",
     name: "Europa",
-    radius: 10,
-    size: 1.1,
+    radius: 230,
+    size: 22,
     color: "#d8dede",
     orbitSpeed: 0.45,
     style: "ice",
@@ -188,8 +188,8 @@ export const moons: MoonConfig[] = [
     id: "callisto",
     parentId: "jupiter",
     name: "Callisto",
-    radius: 14,
-    size: 1.3,
+    radius: 330,
+    size: 25,
     color: "#9e9891",
     orbitSpeed: 0.28,
     style: "rocky",
@@ -206,8 +206,8 @@ export const moons: MoonConfig[] = [
     id: "enceladus",
     parentId: "saturn",
     name: "Enceladus",
-    radius: 11,
-    size: 1,
+    radius: 250,
+    size: 20,
     color: "#f5f7ff",
     orbitSpeed: 0.34,
     style: "ice",
@@ -226,8 +226,8 @@ export const distantObjects: DistantObject[] = [
   {
     id: "helix-nebula",
     name: "Helix Nebula",
-    position: { x: 2100, y: -1700 },
-    size: 18,
+    position: { x: -11000, y: 4000 },
+    size: 340,
     color: "#8dd6ff",
     style: "nebula",
     info: {
@@ -242,8 +242,8 @@ export const distantObjects: DistantObject[] = [
   {
     id: "orion-nebula",
     name: "Orion Nebula",
-    position: { x: -2400, y: 1900 },
-    size: 22,
+    position: { x: 9500, y: 7500 },
+    size: 380,
     color: "#c9a3ff",
     style: "nebula",
     info: {
@@ -257,8 +257,8 @@ export const distantObjects: DistantObject[] = [
   {
     id: "hat-p-11b",
     name: "HAT-P-11 b",
-    position: { x: 2900, y: 1300 },
-    size: 10,
+    position: { x: 12000, y: -3000 },
+    size: 82,
     color: "#7fd3a4",
     style: "exoplanet",
     info: {
@@ -273,8 +273,8 @@ export const distantObjects: DistantObject[] = [
   {
     id: "kepler-22b",
     name: "Kepler-22 b",
-    position: { x: -3200, y: -1600 },
-    size: 12,
+    position: { x: -8000, y: -9000 },
+    size: 88,
     color: "#90b6ff",
     style: "exoplanet",
     info: {
@@ -289,8 +289,8 @@ export const distantObjects: DistantObject[] = [
   {
     id: "kepler-452b",
     name: "Kepler-452 b",
-    position: { x: 3400, y: -2200 },
-    size: 12.5,
+    position: { x: 3000, y: -13000 },
+    size: 92,
     color: "#ffd38a",
     style: "exoplanet",
     info: {
