@@ -61,9 +61,8 @@ export const planets: OrbitalBody[] = [
     style: "cloudy",
     info: {
       title: "Earth",
-      explanation: "Earth is the only known world with stable surface liquid water and life.",
-      lifeSignificance:
-        "It is the baseline for understanding biosignatures and habitable conditions elsewhere.",
+      explanation: "Earth is the only known planet with life.",
+      lifeSignificance: "Liquid water covers over 70% of its surface.",
       accentColor: "#76a7ff",
     },
   },

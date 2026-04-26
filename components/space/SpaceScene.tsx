@@ -214,6 +214,88 @@ function createPlanetTexture(id: string): PlanetTexture {
     return { map, rotSpeed: 0.00006 };
   }
 
+  if (id === "hat-p-11b") {
+    const base = ctx.createLinearGradient(0, 0, map.width, map.height);
+    base.addColorStop(0, "#1f5f7d");
+    base.addColorStop(0.5, "#1f8d9e");
+    base.addColorStop(1, "#143f5c");
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, map.width, map.height);
+    ctx.strokeStyle = "rgba(162,236,255,0.25)";
+    ctx.lineWidth = 9;
+    for (let i = 0; i < 14; i += 1) {
+      const y = (i + 1) * (map.height / 16);
+      ctx.beginPath();
+      ctx.moveTo(0, y + Math.sin(i * 0.4) * 6);
+      ctx.bezierCurveTo(map.width * 0.3, y - 10, map.width * 0.7, y + 10, map.width, y);
+      ctx.stroke();
+    }
+    return { map, rotSpeed: 0.00022 };
+  }
+
+  if (id === "kepler-22b") {
+    const base = ctx.createLinearGradient(0, 0, map.width, map.height);
+    base.addColorStop(0, "#2e6ab5");
+    base.addColorStop(0.55, "#2f8b63");
+    base.addColorStop(1, "#2756a8");
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, map.width, map.height);
+    ctx.fillStyle = "rgba(60,130,76,0.62)";
+    for (let i = 0; i < 12; i += 1) {
+      ctx.beginPath();
+      const x = Math.random() * map.width;
+      const y = Math.random() * map.height;
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + 35, y - 24, x + 90, y + 14, x + 120, y);
+      ctx.bezierCurveTo(x + 90, y + 30, x + 40, y + 34, x, y);
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 6;
+    for (let i = 0; i < 12; i += 1) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * map.width, Math.random() * map.height, 60 + Math.random() * 90, 0, Math.PI);
+      ctx.stroke();
+    }
+    return { map, rotSpeed: 0.00012 };
+  }
+
+  if (id === "kepler-452b") {
+    const base = ctx.createLinearGradient(0, 0, map.width, map.height);
+    base.addColorStop(0, "#4f7fa8");
+    base.addColorStop(0.45, "#5f8f73");
+    base.addColorStop(1, "#5876a0");
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, map.width, map.height);
+
+    ctx.fillStyle = "rgba(116,158,115,0.45)";
+    for (let i = 0; i < 10; i += 1) {
+      ctx.beginPath();
+      const x = Math.random() * map.width;
+      const y = Math.random() * map.height;
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + 28, y - 18, x + 72, y + 12, x + 100, y);
+      ctx.bezierCurveTo(x + 74, y + 24, x + 34, y + 28, x, y);
+      ctx.fill();
+    }
+
+    ctx.strokeStyle = "rgba(255,255,255,0.24)";
+    ctx.lineWidth = 6;
+    for (let i = 0; i < 10; i += 1) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * map.width, Math.random() * map.height, 50 + Math.random() * 90, 0, Math.PI);
+      ctx.stroke();
+    }
+
+    const sunTint = ctx.createLinearGradient(0, 0, map.width, 0);
+    sunTint.addColorStop(0, "rgba(255,219,150,0.18)");
+    sunTint.addColorStop(1, "rgba(255,219,150,0)");
+    ctx.fillStyle = sunTint;
+    ctx.fillRect(0, 0, map.width, map.height);
+
+    return { map, rotSpeed: 0.00008 };
+  }
+
   ctx.fillStyle = "#9aa5b6";
   ctx.fillRect(0, 0, map.width, map.height);
   return { map, rotSpeed: 0.0001 };
@@ -339,7 +421,11 @@ export function SpaceScene() {
     const moonTextures = Object.fromEntries(
       moons.map((moon) => [moon.id, createPlanetTexture(moon.id)])
     ) as Record<string, PlanetTexture>;
-    const exoTexture = createPlanetTexture("neptune");
+    const exoTextures = {
+      "hat-p-11b": createPlanetTexture("hat-p-11b"),
+      "kepler-22b": createPlanetTexture("kepler-22b"),
+      "kepler-452b": createPlanetTexture("kepler-452b"),
+    } as const;
 
     const starLayerFar = createOffscreen(5000, 5000);
     const starLayerMid = createOffscreen(5000, 5000);
@@ -410,7 +496,7 @@ export function SpaceScene() {
 
     const camera = { x: 0, y: 0, zoom: 1, targetZoom: 1 };
     const ship = { x: 0, y: -800, vx: 0, vy: 120, angle: -Math.PI / 2 };
-    const keys = { up: false, down: false, left: false, right: false };
+    const keys = { up: false, down: false, left: false, right: false, boost: false };
     const particles: { x: number; y: number; vx: number; vy: number; life: number; age: number }[] = [];
     const clickTargets: ClickTarget[] = [];
     const textureOffsets: Record<string, number> = {};
@@ -557,13 +643,22 @@ export function SpaceScene() {
       ctx.closePath();
       ctx.fill();
 
+      const thrusterGlow = ctx.createRadialGradient(0, 34, 0, 0, 34, keys.boost ? 20 : 12);
+      thrusterGlow.addColorStop(0, keys.boost ? "rgba(185,232,255,0.95)" : "rgba(170,221,255,0.72)");
+      thrusterGlow.addColorStop(1, "rgba(170,221,255,0)");
+      ctx.fillStyle = thrusterGlow;
+      ctx.beginPath();
+      ctx.arc(0, 34, keys.boost ? 20 : 12, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.restore();
     };
 
     const drawThrusterParticles = (dt: number, accelerating: boolean) => {
-      const spawnRate = accelerating ? 0.0025 : 0.008;
+      const isBoosting = keys.boost;
+      const spawnRate = isBoosting ? 0.0015 : accelerating ? 0.0025 : 0.008;
       if (Math.random() < spawnRate * 60) {
-        const speedBoost = accelerating ? 1.3 : 0.6;
+        const speedBoost = isBoosting ? 2.1 : accelerating ? 1.3 : 0.6;
         particles.push({
           x: ship.x - Math.cos(ship.angle) * 24,
           y: ship.y - Math.sin(ship.angle) * 24,
@@ -586,7 +681,7 @@ export function SpaceScene() {
         const t = p.age / p.life;
         const radius = (5 - 4 * t) * camera.zoom;
         const alpha = 1 - t;
-        ctx.fillStyle = `rgba(170,221,255,${alpha})`;
+        ctx.fillStyle = isBoosting ? `rgba(190,236,255,${alpha})` : `rgba(170,221,255,${alpha})`;
         ctx.beginPath();
         ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
         ctx.fill();
@@ -603,8 +698,9 @@ export function SpaceScene() {
         returnAnimation = { active: true, elapsed: 0 };
       }
 
-      const ax = (Number(keys.right) - Number(keys.left)) * SHIP_ACCEL;
-      const ay = (Number(keys.down) - Number(keys.up)) * SHIP_ACCEL;
+      const accelMultiplier = keys.boost ? 1.6 : 1;
+      const ax = (Number(keys.right) - Number(keys.left)) * SHIP_ACCEL * accelMultiplier;
+      const ay = (Number(keys.down) - Number(keys.up)) * SHIP_ACCEL * accelMultiplier;
       const accelerating = Math.abs(ax) + Math.abs(ay) > 0;
 
       if (returnAnimation.active) {
@@ -623,9 +719,10 @@ export function SpaceScene() {
         ship.vx *= SHIP_DAMPING;
         ship.vy *= SHIP_DAMPING;
         const speed = Math.hypot(ship.vx, ship.vy);
-        if (speed > SHIP_MAX_SPEED) {
-          ship.vx = (ship.vx / speed) * SHIP_MAX_SPEED;
-          ship.vy = (ship.vy / speed) * SHIP_MAX_SPEED;
+        const speedLimit = keys.boost ? SHIP_MAX_SPEED * 2 : SHIP_MAX_SPEED;
+        if (speed > speedLimit) {
+          ship.vx = (ship.vx / speed) * speedLimit;
+          ship.vy = (ship.vy / speed) * speedLimit;
         }
         ship.x += ship.vx * dt;
         ship.y += ship.vy * dt;
@@ -643,6 +740,7 @@ export function SpaceScene() {
       camera.y += (ship.y - camera.y) * 0.08;
       camera.zoom += (camera.targetZoom - camera.zoom) * 0.14;
 
+      // Keep distance readout live while moving by updating every frame.
       setDistanceLabel(formatDistance(Math.hypot(ship.x, ship.y)));
       setShipPosition({ x: ship.x, y: ship.y });
 
@@ -811,7 +909,7 @@ export function SpaceScene() {
           textureOffsets[obj.id] = (textureOffsets[obj.id] ?? 0) + 0.00014;
           drawSphere(
             ctx,
-            exoTexture,
+            exoTextures[obj.id as keyof typeof exoTextures],
             pos.x,
             pos.y,
             obj.size * camera.zoom,
@@ -853,12 +951,20 @@ export function SpaceScene() {
       if (event.key === "ArrowDown") keys.down = true;
       if (event.key === "ArrowLeft") keys.left = true;
       if (event.key === "ArrowRight") keys.right = true;
+      if (event.code === "Space") {
+        keys.boost = true;
+        event.preventDefault();
+      }
     };
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.key === "ArrowUp") keys.up = false;
       if (event.key === "ArrowDown") keys.down = false;
       if (event.key === "ArrowLeft") keys.left = false;
       if (event.key === "ArrowRight") keys.right = false;
+      if (event.code === "Space") {
+        keys.boost = false;
+        event.preventDefault();
+      }
     };
     const onResize = () => resize();
     const onClick = (event: MouseEvent) => {

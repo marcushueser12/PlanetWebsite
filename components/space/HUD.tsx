@@ -20,7 +20,7 @@ export function HUD({
   const mapSize = 146;
   const toMap = (point: Vec2) => ({
     x: ((point.x + minimapRange) / (minimapRange * 2)) * mapSize,
-    y: ((point.y + minimapRange) / (minimapRange * 2)) * mapSize,
+    y: ((minimapRange - point.y) / (minimapRange * 2)) * mapSize,
   });
   const shipMap = toMap(shipPosition);
 
