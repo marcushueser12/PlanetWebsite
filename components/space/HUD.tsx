@@ -6,6 +6,7 @@ type HUDProps = {
   distanceLabel: string;
   shipPosition: Vec2;
   minimapRange: number;
+  solarMarkers: { id: string; label: string; position: Vec2 }[];
   distantMarkers: { id: string; label: string; position: Vec2 }[];
   onReturnToSolarSystem: () => void;
 };
@@ -14,6 +15,7 @@ export function HUD({
   distanceLabel,
   shipPosition,
   minimapRange,
+  solarMarkers,
   distantMarkers,
   onReturnToSolarSystem,
 }: HUDProps) {
@@ -33,6 +35,17 @@ export function HUD({
         <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-cyan-200/90">Mini-map</p>
         <div className="relative h-[146px] w-[146px] rounded-md border border-cyan-300/20 bg-slate-950/90">
           <div className="absolute h-2 w-2 rounded-full bg-yellow-300 shadow-[0_0_8px_rgba(255,214,102,0.9)]" style={{ left: mapSize / 2 - 4, top: mapSize / 2 - 4 }} />
+          {solarMarkers.map((marker) => {
+            const markerMap = toMap(marker.position);
+            return (
+              <div
+                key={marker.id}
+                title={marker.label}
+                className="absolute h-1.5 w-1.5 rounded-full bg-cyan-200/90"
+                style={{ left: markerMap.x - 3, top: markerMap.y - 3 }}
+              />
+            );
+          })}
           {distantMarkers.map((marker) => {
             const markerMap = toMap(marker.position);
             return (

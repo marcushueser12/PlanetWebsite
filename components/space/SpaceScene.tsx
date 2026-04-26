@@ -391,6 +391,7 @@ export function SpaceScene() {
   const [started, setStarted] = useState(false);
   const [distanceLabel, setDistanceLabel] = useState("0.00 AU");
   const [shipPosition, setShipPosition] = useState<Vec2>({ x: 0, y: -800 });
+  const [planetPositions, setPlanetPositions] = useState<Record<string, Vec2>>({});
   const [selection, setSelection] = useState<SelectableObject | null>(null);
   const [selectionScreenPos, setSelectionScreenPos] = useState<Vec2 | null>(null);
   const [returnTick, setReturnTick] = useState(0);
@@ -514,6 +515,7 @@ export function SpaceScene() {
     let previous = performance.now();
     let returnAnimation = { active: false, elapsed: 0 };
     let mouseSelectionRef: { id: string; x: number; y: number } | null = null;
+    let minimapSyncAccumulator = 0;
     const localReturnTick = { value: returnTick };
 
     const resize = () => {
@@ -786,6 +788,15 @@ export function SpaceScene() {
       distantObjects.forEach((obj) => {
         worldMap[obj.id] = obj.position;
       });
+      minimapSyncAccumulator += dt;
+      if (minimapSyncAccumulator >= 0.08) {
+        setPlanetPositions(
+          Object.fromEntries(
+            planets.map((planet) => [planet.id, worldMap[planet.id] ?? { x: planet.radius, y: 0 }])
+          ) as Record<string, Vec2>
+        );
+        minimapSyncAccumulator = 0;
+      }
 
       planetRuntime.forEach((planet) => {
         const pos = worldMap[planet.id];
@@ -1020,6 +1031,11 @@ export function SpaceScene() {
             distanceLabel={distanceLabel}
             shipPosition={shipPosition}
             minimapRange={MINIMAP_RANGE}
+            solarMarkers={planets.map((planet) => ({
+              id: planet.id,
+              label: planet.name,
+              position: planetPositions[planet.id] ?? { x: planet.radius, y: 0 },
+            }))}
             distantMarkers={distantObjects.map((obj) => ({ id: obj.id, label: obj.name, position: obj.position }))}
             onReturnToSolarSystem={() => setReturnTick((prev) => prev + 1)}
           />
