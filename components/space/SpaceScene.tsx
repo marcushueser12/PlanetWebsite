@@ -80,25 +80,50 @@ function createPlanetTexture(id: string): PlanetTexture {
   ctx.fillRect(0, 0, map.width, map.height);
 
   if (id === "earth") {
-    ctx.fillStyle = "#2f71c8";
+    const ocean = ctx.createLinearGradient(0, 0, map.width, map.height);
+    ocean.addColorStop(0, "#1f4f9d");
+    ocean.addColorStop(0.5, "#2b79c9");
+    ocean.addColorStop(1, "#1b4a95");
+    ctx.fillStyle = ocean;
     ctx.fillRect(0, 0, map.width, map.height);
-    ctx.fillStyle = "#3d8c56";
-    for (let i = 0; i < 20; i += 1) {
+    ctx.fillStyle = "#2f7c4f";
+    for (let i = 0; i < 26; i += 1) {
       ctx.beginPath();
       const x = Math.random() * map.width;
       const y = Math.random() * map.height;
       ctx.moveTo(x, y);
-      ctx.bezierCurveTo(x + 40, y - 30, x + 100, y + 20, x + 140, y);
-      ctx.bezierCurveTo(x + 110, y + 30, x + 50, y + 40, x, y);
+      ctx.bezierCurveTo(x + 30, y - 22, x + 94, y + 16, x + 128, y);
+      ctx.bezierCurveTo(x + 98, y + 27, x + 45, y + 34, x, y);
       ctx.fill();
     }
-    ctx.strokeStyle = "rgba(255,255,255,0.36)";
-    ctx.lineWidth = 6;
-    for (let i = 0; i < 12; i += 1) {
+    ctx.fillStyle = "rgba(179,152,110,0.34)";
+    for (let i = 0; i < 16; i += 1) {
       ctx.beginPath();
-      ctx.arc(Math.random() * map.width, Math.random() * map.height, 40 + Math.random() * 120, 0, Math.PI);
+      ctx.ellipse(
+        Math.random() * map.width,
+        Math.random() * map.height,
+        16 + Math.random() * 46,
+        8 + Math.random() * 22,
+        Math.random() * Math.PI,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(255,255,255,0.42)";
+    ctx.lineWidth = 5;
+    for (let i = 0; i < 18; i += 1) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * map.width, Math.random() * map.height, 28 + Math.random() * 110, 0, Math.PI);
       ctx.stroke();
     }
+    const polarGlow = ctx.createLinearGradient(0, 0, 0, map.height);
+    polarGlow.addColorStop(0, "rgba(240,248,255,0.55)");
+    polarGlow.addColorStop(0.2, "rgba(240,248,255,0)");
+    polarGlow.addColorStop(0.8, "rgba(240,248,255,0)");
+    polarGlow.addColorStop(1, "rgba(240,248,255,0.5)");
+    ctx.fillStyle = polarGlow;
+    ctx.fillRect(0, 0, map.width, map.height);
     return { map, rotSpeed: 0.0002 };
   }
 
@@ -881,20 +906,71 @@ export function SpaceScene() {
       distantObjects.forEach((obj) => {
         const pos = worldToScreen(obj.position.x, obj.position.y);
         if (obj.id === "helix-nebula") {
-          ctx.strokeStyle = "rgba(116,229,243,0.65)";
-          ctx.lineWidth = 8 * camera.zoom;
+          const baseR = obj.size * camera.zoom;
+          const organicPulse = 1 + Math.sin(time * 0.22) * 0.04;
+          const distort = Math.sin(time * 0.13) * 0.12;
+          const blurPx = `${Math.max(8, 18 * camera.zoom)}px`;
+
+          ctx.save();
+          ctx.filter = `blur(${blurPx})`;
+
+          // Outer reddish cloud: layered, uneven gas lobes.
+          ctx.globalAlpha = 0.26;
+          ctx.fillStyle = "rgba(179,74,63,0.72)";
+          for (let i = 0; i < 5; i += 1) {
+            const ang = i * 1.23 + time * 0.04;
+            ctx.beginPath();
+            ctx.ellipse(
+              pos.x + Math.cos(ang) * baseR * 0.16,
+              pos.y + Math.sin(ang) * baseR * 0.12,
+              baseR * (1.07 + Math.sin(ang + distort) * 0.08),
+              baseR * (0.8 + Math.cos(ang - distort) * 0.1),
+              -0.3 + Math.sin(ang) * 0.18,
+              0,
+              Math.PI * 2
+            );
+            ctx.fill();
+          }
+
+          // Orange/yellow ring region: filled overlapping distorted ellipses.
+          ctx.globalAlpha = 0.42;
+          ctx.fillStyle = "rgba(247,176,88,0.78)";
+          for (let i = 0; i < 4; i += 1) {
+            const ang = i * 1.57 + time * 0.05;
+            ctx.beginPath();
+            ctx.ellipse(
+              pos.x + Math.cos(ang) * baseR * 0.05,
+              pos.y + Math.sin(ang) * baseR * 0.04,
+              baseR * (0.78 + Math.sin(ang + distort) * 0.06),
+              baseR * (0.5 + Math.cos(ang - distort) * 0.05),
+              -0.28 + Math.sin(ang) * 0.08,
+              0,
+              Math.PI * 2
+            );
+            ctx.fill();
+          }
+
+          // Bright soft blue core: more solid center with slight organic variance.
+          ctx.globalAlpha = 0.65;
+          ctx.fillStyle = "rgba(132,225,255,0.9)";
           ctx.beginPath();
-          ctx.ellipse(pos.x, pos.y, obj.size * camera.zoom * 0.95, obj.size * camera.zoom * 0.72, -0.25, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255,170,104,0.48)";
-          ctx.lineWidth = 6 * camera.zoom;
-          ctx.beginPath();
-          ctx.ellipse(pos.x, pos.y, obj.size * camera.zoom * 0.68, obj.size * camera.zoom * 0.44, -0.25, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.fillStyle = "#fff0bc";
-          ctx.beginPath();
-          ctx.arc(pos.x, pos.y, 3.5 * camera.zoom, 0, Math.PI * 2);
+          ctx.ellipse(
+            pos.x + Math.sin(time * 0.17) * baseR * 0.02,
+            pos.y + Math.cos(time * 0.19) * baseR * 0.015,
+            baseR * 0.43 * organicPulse,
+            baseR * 0.31 * (1 - distort * 0.18),
+            -0.24,
+            0,
+            Math.PI * 2
+          );
           ctx.fill();
+
+          ctx.globalAlpha = 0.92;
+          ctx.fillStyle = "rgba(198,244,255,0.9)";
+          ctx.beginPath();
+          ctx.ellipse(pos.x, pos.y, baseR * 0.16, baseR * 0.12, -0.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
         } else if (obj.id === "orion-nebula") {
           const g = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, obj.size * camera.zoom * 1.5);
           g.addColorStop(0, "rgba(255,154,220,0.5)");
