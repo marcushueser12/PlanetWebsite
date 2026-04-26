@@ -239,6 +239,131 @@ function createPlanetTexture(id: string): PlanetTexture {
     return { map, rotSpeed: 0.00006 };
   }
 
+  // Jupiter / Saturn moons — distinct icy vs ancient surfaces (not flat gray)
+  if (id === "europa") {
+    const ice = ctx.createLinearGradient(0, 0, map.width, map.height);
+    ice.addColorStop(0, "#c8dce8");
+    ice.addColorStop(0.45, "#aec8d8");
+    ice.addColorStop(1, "#9bb5c9");
+    ctx.fillStyle = ice;
+    ctx.fillRect(0, 0, map.width, map.height);
+    ctx.fillStyle = "rgba(120,140,155,0.22)";
+    for (let i = 0; i < 40; i += 1) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * map.width, Math.random() * map.height, 2 + Math.random() * 7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(70,95,118,0.35)";
+    ctx.lineWidth = 2;
+    for (let c = 0; c < 8; c += 1) {
+      ctx.beginPath();
+      ctx.moveTo(map.width * (0.1 + c * 0.1), map.height * 0.2);
+      ctx.bezierCurveTo(
+        map.width * (0.25 + c * 0.08),
+        map.height * (0.35 + (c % 3) * 0.1),
+        map.width * (0.55 + c * 0.05),
+        map.height * (0.55 + (c % 2) * 0.08),
+        map.width * (0.85 - c * 0.05),
+        map.height * 0.75
+      );
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(180,195,210,0.25)";
+    for (let i = 0; i < 6; i += 1) {
+      ctx.beginPath();
+      ctx.ellipse(
+        Math.random() * map.width,
+        Math.random() * map.height,
+        30 + Math.random() * 70,
+        12 + Math.random() * 28,
+        Math.random() * Math.PI,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+    return { map, rotSpeed: 0.00018 };
+  }
+
+  if (id === "callisto") {
+    const rock = ctx.createLinearGradient(0, 0, map.width, map.height);
+    rock.addColorStop(0, "#4a4540");
+    rock.addColorStop(0.5, "#6b635c");
+    rock.addColorStop(1, "#5a534d");
+    ctx.fillStyle = rock;
+    ctx.fillRect(0, 0, map.width, map.height);
+    ctx.fillStyle = "rgba(55,48,44,0.55)";
+    for (let i = 0; i < 85; i += 1) {
+      const r = 3 + Math.random() * 14;
+      ctx.beginPath();
+      ctx.arc(Math.random() * map.width, Math.random() * map.height, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(140,128,118,0.28)";
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 12; i += 1) {
+      ctx.beginPath();
+      ctx.arc(
+        Math.random() * map.width,
+        Math.random() * map.height,
+        18 + Math.random() * 35,
+        0,
+        Math.PI * 2
+      );
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(45,40,36,0.4)";
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 5; i += 1) {
+      ctx.beginPath();
+      ctx.moveTo(map.width * (0.15 + i * 0.18), 0);
+      ctx.lineTo(map.width * (0.1 + i * 0.2), map.height);
+      ctx.stroke();
+    }
+    return { map, rotSpeed: 0.0001 };
+  }
+
+  if (id === "enceladus") {
+    const shell = ctx.createLinearGradient(0, 0, 0, map.height);
+    shell.addColorStop(0, "#f0f4fb");
+    shell.addColorStop(0.5, "#d4e2f0");
+    shell.addColorStop(1, "#b8c9dc");
+    ctx.fillStyle = shell;
+    ctx.fillRect(0, 0, map.width, map.height);
+    ctx.fillStyle = "rgba(200,215,230,0.5)";
+    for (let i = 0; i < 20; i += 1) {
+      ctx.beginPath();
+      ctx.ellipse(
+        Math.random() * map.width,
+        Math.random() * map.height,
+        20 + Math.random() * 50,
+        8 + Math.random() * 16,
+        Math.random() * Math.PI,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(80,100,130,0.4)";
+    ctx.lineWidth = 1.5;
+    for (let s = 0; s < 10; s += 1) {
+      const y0 = (s / 10) * map.height;
+      ctx.beginPath();
+      ctx.moveTo(0, y0);
+      for (let x = 0; x <= map.width; x += 40) {
+        ctx.lineTo(x, y0 + Math.sin(x * 0.02 + s) * 6);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    for (let i = 0; i < 8; i += 1) {
+      ctx.beginPath();
+      ctx.arc(Math.random() * map.width, Math.random() * map.height, 3 + Math.random() * 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    return { map, rotSpeed: 0.0002 };
+  }
+
   if (id === "hat-p-11b") {
     const base = ctx.createLinearGradient(0, 0, map.width, map.height);
     base.addColorStop(0, "#1f5f7d");
