@@ -23,7 +23,7 @@ export const planets: OrbitalBody[] = [
     id: "mercury",
     name: "Mercury",
     radius: 500,
-    size: 60,
+    size: 36,
     color: "#b5b5b5",
     orbitSpeed: 0.12,
     style: "rocky",
@@ -39,15 +39,16 @@ export const planets: OrbitalBody[] = [
     id: "venus",
     name: "Venus",
     radius: 800,
-    size: 90,
+    size: 54,
     color: "#d9a066",
     orbitSpeed: 0.095,
     style: "cloudy",
     info: {
       title: "Venus",
-      explanation: "Venus has a dense atmosphere and runaway greenhouse conditions.",
+      explanation:
+        "Venus may have once had oceans billions of years ago. Now it is extremely hot and dry.",
       lifeSignificance:
-        "It is a cautionary model for climate evolution and planetary habitability limits.",
+        "Evidence of past water on Venus shows that Earth-like conditions may not be permanent. This has led scientists to consider how many planets may have once supported life but later became hostile. It expands the idea that life could emerge in more places than we currently observe.",
       accentColor: "#f2c178",
     },
   },
@@ -55,14 +56,15 @@ export const planets: OrbitalBody[] = [
     id: "earth",
     name: "Earth",
     radius: 1100,
-    size: 96,
+    size: 58,
     color: "#4b8df8",
     orbitSpeed: 0.08,
     style: "cloudy",
     info: {
       title: "Earth",
       explanation: "Earth is the only known planet with life.",
-      lifeSignificance: "Liquid water covers over 70% of its surface.",
+      lifeSignificance:
+        "Water is essential to all known life on Earth, making it the foundation for how scientists define habitability. Because life and water are closely linked, scientists use the presence of water elsewhere as a key indicator of potential life. This shifts the question from whether Earth is unique to where similar conditions might exist.",
       accentColor: "#76a7ff",
     },
   },
@@ -70,15 +72,15 @@ export const planets: OrbitalBody[] = [
     id: "mars",
     name: "Mars",
     radius: 1500,
-    size: 78,
+    size: 47,
     color: "#c45a3a",
     orbitSpeed: 0.065,
     style: "rocky",
     info: {
       title: "Mars",
-      explanation: "Mars preserves signs of ancient rivers, lakes, and water-rich minerals.",
+      explanation: "Mars shows evidence of ancient rivers and lakes. Ice still exists at its poles.",
       lifeSignificance:
-        "Past water on Mars suggests habitable environments can emerge beyond Earth.",
+        "The discovery of ancient water on Mars suggests it may have once had conditions suitable for life. This changed scientific thinking by showing that planets can shift between habitable and uninhabitable states. As a result, scientists now consider that life could have existed elsewhere, even if it does not anymore.",
       accentColor: "#ff7d57",
     },
   },
@@ -86,7 +88,7 @@ export const planets: OrbitalBody[] = [
     id: "jupiter",
     name: "Jupiter",
     radius: 2300,
-    size: 190,
+    size: 106,
     color: "#d2b08a",
     orbitSpeed: 0.045,
     style: "banded",
@@ -102,7 +104,7 @@ export const planets: OrbitalBody[] = [
     id: "saturn",
     name: "Saturn",
     radius: 3200,
-    size: 170,
+    size: 98,
     color: "#e4c88b",
     orbitSpeed: 0.036,
     style: "banded",
@@ -118,7 +120,7 @@ export const planets: OrbitalBody[] = [
     id: "uranus",
     name: "Uranus",
     radius: 4300,
-    size: 130,
+    size: 74,
     color: "#8bd9dc",
     orbitSpeed: 0.028,
     style: "ice",
@@ -134,7 +136,7 @@ export const planets: OrbitalBody[] = [
     id: "neptune",
     name: "Neptune",
     radius: 5200,
-    size: 126,
+    size: 72,
     color: "#4a7bd2",
     orbitSpeed: 0.023,
     style: "ice",
@@ -150,15 +152,15 @@ export const planets: OrbitalBody[] = [
     id: "pluto",
     name: "Pluto",
     radius: 6000,
-    size: 55,
+    size: 34,
     color: "#ceb9a2",
     orbitSpeed: 0.018,
     style: "rocky",
     info: {
       title: "Pluto",
-      explanation: "Pluto is a distant dwarf planet in the Kuiper Belt.",
+      explanation: "Contains frozen water ice. May have had a subsurface ocean.",
       lifeSignificance:
-        "Even tiny icy worlds can host complex chemistry, expanding habitability thinking.",
+        "Water on Pluto shows that even distant, cold worlds can contain this essential ingredient. This challenges the idea that only warm planets can support life. Scientists now consider more extreme environments as possible habitats.",
       accentColor: "#e2d2c2",
     },
   },
@@ -177,9 +179,10 @@ export const moons: MoonConfig[] = [
     phase: 1.2,
     info: {
       title: "Europa",
-      explanation: "Europa likely has a salty ocean beneath its icy crust.",
+      explanation:
+        "Europa has a vast ocean beneath its icy surface. Water is kept warm by internal heating.",
       lifeSignificance:
-        "Subsurface oceans with energy gradients are one of the strongest habitats for potential life.",
+        "Europa’s subsurface ocean shows that liquid water can exist far from the Sun. This challenges the idea that only Earth-like planets can support life. Scientists now consider icy moons as possible habitats.",
       accentColor: "#c6f4ff",
     },
   },
@@ -195,9 +198,10 @@ export const moons: MoonConfig[] = [
     phase: 0.4,
     info: {
       title: "Callisto",
-      explanation: "Callisto is heavily cratered and may have a deep subsurface ocean.",
+      explanation:
+        "Likely has a subsurface ocean. Less geologically active than Europa.",
       lifeSignificance:
-        "It adds evidence that ocean-bearing moons may be common in giant planet systems.",
+        "The possibility of water on Callisto suggests that water may be more common than once thought. Even without strong geological activity, it may still support stable environments. This broadens what scientists consider potentially habitable.",
       accentColor: "#b9b0aa",
     },
   },
@@ -213,9 +217,10 @@ export const moons: MoonConfig[] = [
     phase: 2.4,
     info: {
       title: "Enceladus",
-      explanation: "Enceladus ejects water-rich plumes from a global subsurface ocean.",
+      explanation:
+        "Shoots water vapor into space through geysers. Contains organic molecules.",
       lifeSignificance:
-        "Its plumes contain key ingredients for life, making it a top astrobiology target.",
+        "Enceladus provides direct evidence of water and key chemical ingredients for life. This makes it one of the strongest examples that life-supporting conditions can exist beyond Earth. It strengthens the argument that such conditions may not be rare.",
       accentColor: "#d7e7ff",
     },
   },
@@ -231,10 +236,9 @@ export const distantObjects: DistantObject[] = [
     style: "nebula",
     info: {
       title: "Helix Nebula",
-      explanation:
-        "A planetary nebula formed when a dying star shed its outer layers into space.",
+      explanation: "Water molecules detected in expelled gas.",
       lifeSignificance:
-        "Nebulae enrich space with heavy elements that later become planets and life chemistry.",
+        "Water in the Helix Nebula shows that it can exist even after stars die. This suggests water is not limited to stable systems. Scientists see it as a widespread component of the universe.",
       accentColor: "#73d7ff",
     },
   },
@@ -247,9 +251,9 @@ export const distantObjects: DistantObject[] = [
     style: "nebula",
     info: {
       title: "Orion Nebula",
-      explanation: "A nearby stellar nursery where new stars and protoplanetary disks form.",
+      explanation: "Contains water vapor in star-forming regions.",
       lifeSignificance:
-        "It reveals how the raw materials of water-rich planets can emerge early in star systems.",
+        "Water in the Orion Nebula shows that it forms naturally where stars and planets are created. This suggests water is common in the universe. If water is widespread, the conditions for life may also be more common.",
       accentColor: "#ea9cff",
     },
   },
@@ -262,10 +266,9 @@ export const distantObjects: DistantObject[] = [
     style: "exoplanet",
     info: {
       title: "HAT-P-11 b",
-      explanation:
-        "An exoplanet where atmospheric water vapor has been detected by spectroscopy.",
+      explanation: "Water vapor detected in its atmosphere.",
       lifeSignificance:
-        "It demonstrates that water-bearing atmospheres exist beyond our solar system.",
+        "This discovery confirms that water exists on planets outside our solar system. It moves the search for life from theory to observation. It strengthens the idea that life-supporting conditions may exist elsewhere.",
       accentColor: "#8ef0be",
     },
   },
@@ -278,10 +281,9 @@ export const distantObjects: DistantObject[] = [
     style: "exoplanet",
     info: {
       title: "Kepler-22 b",
-      explanation:
-        "A candidate exoplanet in the habitable zone of its parent star.",
+      explanation: "Located in the habitable zone. May have liquid water.",
       lifeSignificance:
-        "Habitable-zone worlds are key candidates when assessing where life might persist.",
+        "Kepler-22 b is one of the first strong candidates for a potentially habitable exoplanet. Its location suggests liquid water could exist. This supports the idea that Earth-like environments may not be rare.",
       accentColor: "#9cb7ff",
     },
   },
@@ -294,9 +296,9 @@ export const distantObjects: DistantObject[] = [
     style: "exoplanet",
     info: {
       title: "Kepler-452 b",
-      explanation: "An Earth-size candidate orbiting in a Sun-like star's habitable region.",
+      explanation: "Similar size and orbit to Earth. Likely in a habitable zone.",
       lifeSignificance:
-        "It is part of the evidence that Earth-like orbital conditions may not be rare.",
+        "Kepler-452 b suggests that Earth-like planets may be common. Its similarities to Earth make it a strong candidate for habitability. As more planets like this are found, the possibility of life beyond Earth becomes more likely.",
       accentColor: "#ffd48b",
     },
   },

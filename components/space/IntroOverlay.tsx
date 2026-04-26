@@ -46,6 +46,13 @@ export function IntroOverlay({ onBegin }: IntroOverlayProps) {
           Begin Exploration
         </button>
       </div>
+      <button
+        type="button"
+        onClick={onBegin}
+        className="absolute bottom-5 right-5 rounded-md border border-white/20 bg-white/8 px-3 py-1.5 text-xs font-mono text-white/80 transition hover:bg-white/14 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+      >
+        Skip
+      </button>
     </div>
   );
 }
