@@ -51,6 +51,10 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+function smoothing(rate: number, dt: number): number {
+  return 1 - Math.exp(-rate * dt);
+}
+
 function formatDistance(worldDistance: number): string {
   const distanceAu = worldDistance / WORLD_UNITS_PER_AU;
   if (distanceAu < 30) return `${distanceAu.toFixed(distanceAu < 10 ? 2 : 1)} AU`;
@@ -539,6 +543,7 @@ function drawSaturnRing(
 export function SpaceScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [started, setStarted] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [distanceLabel, setDistanceLabel] = useState("0.00 AU");
   const [shipPosition, setShipPosition] = useState<Vec2>({ x: 0, y: -800 });
   const [planetPositions, setPlanetPositions] = useState<Record<string, Vec2>>({});
@@ -666,6 +671,7 @@ export function SpaceScene() {
     let returnAnimation = { active: false, elapsed: 0 };
     let mouseSelectionRef: { id: string; x: number; y: number } | null = null;
     let minimapSyncAccumulator = 0;
+    let hudSyncAccumulator = 0;
     const localReturnTick = { value: returnTick };
 
     const resize = () => {
@@ -868,8 +874,9 @@ export function SpaceScene() {
       } else {
         ship.vx += ax * dt;
         ship.vy += ay * dt;
-        ship.vx *= SHIP_DAMPING;
-        ship.vy *= SHIP_DAMPING;
+        const damping = Math.pow(SHIP_DAMPING, dt * 60);
+        ship.vx *= damping;
+        ship.vy *= damping;
         const speed = Math.hypot(ship.vx, ship.vy);
         const speedLimit = keys.boost ? SHIP_MAX_SPEED * 2 : SHIP_MAX_SPEED;
         if (speed > speedLimit) {
@@ -885,16 +892,22 @@ export function SpaceScene() {
 
       const targetAngle = Math.atan2(ship.vy, ship.vx);
       if (Math.hypot(ship.vx, ship.vy) > 12) {
-        ship.angle = angleLerp(ship.angle, targetAngle, 0.12);
+        ship.angle = angleLerp(ship.angle, targetAngle, smoothing(7.5, dt));
       }
 
-      camera.x += (ship.x - camera.x) * 0.08;
-      camera.y += (ship.y - camera.y) * 0.08;
-      camera.zoom += (camera.targetZoom - camera.zoom) * 0.14;
+      const cameraFollow = smoothing(8, dt);
+      const zoomFollow = smoothing(10, dt);
+      camera.x += (ship.x - camera.x) * cameraFollow;
+      camera.y += (ship.y - camera.y) * cameraFollow;
+      camera.zoom += (camera.targetZoom - camera.zoom) * zoomFollow;
 
-      // Keep distance readout live while moving by updating every frame.
-      setDistanceLabel(formatDistance(Math.hypot(ship.x, ship.y)));
-      setShipPosition({ x: ship.x, y: ship.y });
+      // Decouple HUD updates from render loop to reduce React-induced frame jitter.
+      hudSyncAccumulator += dt;
+      if (hudSyncAccumulator >= 0.05) {
+        setDistanceLabel(formatDistance(Math.hypot(ship.x, ship.y)));
+        setShipPosition({ x: ship.x, y: ship.y });
+        hudSyncAccumulator = 0;
+      }
 
       ctx.fillStyle = "#03050a";
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
@@ -1226,6 +1239,14 @@ export function SpaceScene() {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
       {!started && <IntroOverlay onBegin={() => setStarted(true)} />}
+      <button
+        type="button"
+        aria-label="Open model disclaimer"
+        onClick={() => setShowDisclaimer(true)}
+        className="absolute right-4 top-4 z-40 flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/15 text-sm font-bold text-white transition hover:bg-white/25"
+      >
+        !
+      </button>
       {started && (
         <>
           <HUD
@@ -1244,6 +1265,138 @@ export function SpaceScene() {
             <ObjectInfoCard name={selection.name} info={selection.info} screenPosition={selectionScreenPos} />
           )}
         </>
+      )}
+      {showDisclaimer && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center bg-black/45 px-4"
+          onClick={() => setShowDisclaimer(false)}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-2xl rounded-xl border border-white/20 bg-slate-950/95 p-5 text-slate-100 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Sources"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-300">Sources</p>
+              <button
+                type="button"
+                onClick={() => setShowDisclaimer(false)}
+                className="rounded-md border border-white/30 px-2 py-1 text-xs text-slate-200 transition hover:bg-white/10"
+              >
+                X
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto pr-1 text-xs leading-6 text-slate-200">
+              <ul className="space-y-3">
+                <li>
+                  Cockell, Charles S. “The Limits of Habitability.” <em>Philosophical Transactions of the Royal
+                  Society A</em>, vol. 372, no. 2014, 2014.{" "}
+                  <a
+                    href="https://doi.org/10.1098/rsta.2013.0276"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://doi.org/10.1098/rsta.2013.0276
+                  </a>
+                </li>
+                <li>
+                  Hsu, Hsiang-Wen, et al. “Ongoing Hydrothermal Activities within Enceladus.” <em>Nature</em>, vol.
+                  519, no. 7542, 2015, pp. 207–210.{" "}
+                  <a
+                    href="https://doi.org/10.1038/nature14262"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://doi.org/10.1038/nature14262
+                  </a>
+                </li>
+                <li>
+                  Mitri, Giuseppe, et al. “Exploration of Enceladus and Titan: Investigating Ocean Worlds’ Evolution
+                  and Habitability in the Saturn System.” <em>Experimental Astronomy</em>, vol. 54, no. 2–3, 2022, pp.
+                  877–910.{" "}
+                  <a
+                    href="https://doi.org/10.1007/s10686-021-09772-2"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://doi.org/10.1007/s10686-021-09772-2
+                  </a>
+                </li>
+                <li>
+                  NASA. “Some Icy Exoplanets May Have Habitable Oceans and Geysers.” Dec. 13, 2023.{" "}
+                  <a
+                    href="https://www.nasa.gov/science-research/planetary-science/astrobiology/nasa-some-icy-exoplanets-may-have-habitable-oceans-and-geysers/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://www.nasa.gov/science-research/planetary-science/astrobiology/nasa-some-icy-exoplanets-may-have-habitable-oceans-and-geysers/
+                  </a>
+                </li>
+                <li>
+                  NOAA. “Are There Oceans on Other Planets?” National Ocean Service, June 16, 2024.{" "}
+                  <a
+                    href="https://oceanservice.noaa.gov/facts/et-oceans.html"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://oceanservice.noaa.gov/facts/et-oceans.html
+                  </a>
+                </li>
+                <li>
+                  NASA Science. “Ocean Worlds: Water in the Solar System and Beyond.” Sept. 3, 2025.{" "}
+                  <a
+                    href="https://science.nasa.gov/solar-system/ocean-worlds/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://science.nasa.gov/solar-system/ocean-worlds/
+                  </a>
+                </li>
+                <li>
+                  Weber, Jessica M., et al. “A Review on Hypothesized Metabolic Pathways on Europa and Enceladus.”{" "}
+                  <em>Life</em>, vol. 7, no. 4, 2017, article 45.{" "}
+                  <a
+                    href="https://doi.org/10.3390/life7040045"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://doi.org/10.3390/life7040045
+                  </a>
+                </li>
+                <li>
+                  NASA Science. “What Is the Habitable Zone?” March 10, 2021.{" "}
+                  <a
+                    href="https://science.nasa.gov/exoplanets/habitable-zone/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-300 hover:text-sky-200"
+                  >
+                    https://science.nasa.gov/exoplanets/habitable-zone/
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDisclaimer(false)}
+                className="rounded-md border border-white/30 px-3 py-1.5 text-sm text-slate-100 transition hover:bg-white/10"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
     </div>
