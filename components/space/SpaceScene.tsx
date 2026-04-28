@@ -544,6 +544,7 @@ export function SpaceScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [started, setStarted] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showSources, setShowSources] = useState(false);
   const [distanceLabel, setDistanceLabel] = useState("0.00 AU");
   const [shipPosition, setShipPosition] = useState<Vec2>({ x: 0, y: -800 });
   const [planetPositions, setPlanetPositions] = useState<Record<string, Vec2>>({});
@@ -1239,14 +1240,32 @@ export function SpaceScene() {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
       {!started && <IntroOverlay onBegin={() => setStarted(true)} />}
-      <button
-        type="button"
-        aria-label="Open model disclaimer"
-        onClick={() => setShowDisclaimer(true)}
-        className="absolute right-4 top-4 z-40 flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/15 text-sm font-bold text-white transition hover:bg-white/25"
-      >
-        !
-      </button>
+      <div className="absolute right-4 top-4 z-40 flex flex-col items-center gap-2">
+        <button
+          type="button"
+          aria-label="Open disclaimer"
+          onClick={() => {
+            setShowSources(false);
+            setShowDisclaimer(true);
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/15 text-sm font-bold text-white transition hover:bg-white/25"
+        >
+          !
+        </button>
+        <button
+          type="button"
+          aria-label="Open sources"
+          onClick={() => {
+            setShowDisclaimer(false);
+            setShowSources(true);
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/15 text-white transition hover:bg-white/25"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
+            <path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v16.5A2.5 2.5 0 0 0 17.5 16H5V4.5Zm2.5-.5A.5.5 0 0 0 7 4.5V14h10.5c.18 0 .34.01.5.04V4H7.5ZM5 18h12.5c.83 0 1.5.67 1.5 1.5S18.33 21 17.5 21H7a2 2 0 0 1-2-2v-1Z" />
+          </svg>
+        </button>
+      </div>
       {started && (
         <>
           <HUD
@@ -1273,6 +1292,46 @@ export function SpaceScene() {
           role="presentation"
         >
           <div
+            className="w-full max-w-xl rounded-xl border border-white/20 bg-slate-950/95 p-5 text-slate-100 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Disclaimer"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-300">Disclaimer</p>
+              <button
+                type="button"
+                onClick={() => setShowDisclaimer(false)}
+                className="rounded-md border border-white/30 px-2 py-1 text-xs text-slate-200 transition hover:bg-white/10"
+              >
+                X
+              </button>
+            </div>
+            <p className="text-sm leading-6 text-slate-200">
+              This interactive model is not to scale. Distances, sizes, speeds, and visual representations have been
+              adjusted for educational purposes, accessibility, and user interaction. Planetary visuals and object
+              appearances are simplified and are not fully scientifically accurate.
+            </p>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDisclaimer(false)}
+                className="rounded-md border border-white/30 px-3 py-1.5 text-sm text-slate-100 transition hover:bg-white/10"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSources && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center bg-black/45 px-4"
+          onClick={() => setShowSources(false)}
+          role="presentation"
+        >
+          <div
             className="w-full max-w-2xl rounded-xl border border-white/20 bg-slate-950/95 p-5 text-slate-100 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
             role="dialog"
@@ -1283,7 +1342,7 @@ export function SpaceScene() {
               <p className="text-sm font-semibold uppercase tracking-wide text-slate-300">Sources</p>
               <button
                 type="button"
-                onClick={() => setShowDisclaimer(false)}
+                onClick={() => setShowSources(false)}
                 className="rounded-md border border-white/30 px-2 py-1 text-xs text-slate-200 transition hover:bg-white/10"
               >
                 X
@@ -1389,7 +1448,7 @@ export function SpaceScene() {
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                onClick={() => setShowDisclaimer(false)}
+                onClick={() => setShowSources(false)}
                 className="rounded-md border border-white/30 px-3 py-1.5 text-sm text-slate-100 transition hover:bg-white/10"
               >
                 Close
