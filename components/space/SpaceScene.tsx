@@ -552,6 +552,7 @@ export function SpaceScene() {
   const [selectionScreenPos, setSelectionScreenPos] = useState<Vec2 | null>(null);
   const [returnTick, setReturnTick] = useState(0);
   const selectionRef = useRef<SelectableObject | null>(null);
+  const pausedRef = useRef(false);
 
   const planetRuntime = useMemo<PlanetRuntime[]>(
     () =>
@@ -565,6 +566,7 @@ export function SpaceScene() {
 
   useEffect(() => {
     selectionRef.current = selection;
+    pausedRef.current = Boolean(selection);
   }, [selection]);
 
   useEffect(() => {
@@ -814,6 +816,19 @@ export function SpaceScene() {
     };
 
     const drawThrusterParticles = (dt: number, accelerating: boolean) => {
+      if (dt <= 0) {
+        for (const p of particles) {
+          const s = worldToScreen(p.x, p.y);
+          const t = p.age / p.life;
+          const radius = (5 - 4 * t) * camera.zoom;
+          const alpha = 1 - t;
+          ctx.fillStyle = keys.boost ? `rgba(190,236,255,${alpha})` : `rgba(170,221,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        return;
+      }
       const isBoosting = keys.boost;
       const spawnRate = isBoosting ? 0.0015 : accelerating ? 0.0025 : 0.008;
       if (Math.random() < spawnRate * 60) {
@@ -847,14 +862,19 @@ export function SpaceScene() {
       }
     };
 
+    let simulationTime = 0;
     const render = (now: number) => {
       const dt = Math.min((now - previous) / 1000, 0.033);
       previous = now;
-      const time = now * 0.001;
+      const paused = pausedRef.current;
+      if (!paused) simulationTime += dt;
+      const time = simulationTime;
 
-      if (localReturnTick.value !== returnTick) {
-        localReturnTick.value = returnTick;
-        returnAnimation = { active: true, elapsed: 0 };
+      if (!paused) {
+        if (localReturnTick.value !== returnTick) {
+          localReturnTick.value = returnTick;
+          returnAnimation = { active: true, elapsed: 0 };
+        }
       }
 
       const accelMultiplier = keys.boost ? 1.6 : 1;
@@ -862,52 +882,60 @@ export function SpaceScene() {
       const ay = (Number(keys.down) - Number(keys.up)) * SHIP_ACCEL * accelMultiplier;
       const accelerating = Math.abs(ax) + Math.abs(ay) > 0;
 
-      if (returnAnimation.active) {
-        returnAnimation.elapsed += dt;
-        const t = clamp(returnAnimation.elapsed / RETURN_DURATION, 0, 1);
-        const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        ship.x += (0 - ship.x) * (e * 0.08 + 0.02);
-        ship.y += (0 - ship.y) * (e * 0.08 + 0.02);
-        ship.vx *= 0.8;
-        ship.vy *= 0.8;
-        camera.targetZoom = 1 + Math.sin(t * Math.PI) * 0.16;
-        if (t >= 1) returnAnimation.active = false;
-      } else {
-        ship.vx += ax * dt;
-        ship.vy += ay * dt;
-        const damping = Math.pow(SHIP_DAMPING, dt * 60);
-        ship.vx *= damping;
-        ship.vy *= damping;
-        const speed = Math.hypot(ship.vx, ship.vy);
-        const speedLimit = keys.boost ? SHIP_MAX_SPEED * 2 : SHIP_MAX_SPEED;
-        if (speed > speedLimit) {
-          ship.vx = (ship.vx / speed) * speedLimit;
-          ship.vy = (ship.vy / speed) * speedLimit;
+      if (!paused) {
+        if (returnAnimation.active) {
+          returnAnimation.elapsed += dt;
+          const t = clamp(returnAnimation.elapsed / RETURN_DURATION, 0, 1);
+          const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          ship.x += (0 - ship.x) * (e * 0.08 + 0.02);
+          ship.y += (0 - ship.y) * (e * 0.08 + 0.02);
+          ship.vx *= 0.8;
+          ship.vy *= 0.8;
+          camera.targetZoom = 1 + Math.sin(t * Math.PI) * 0.16;
+          if (t >= 1) returnAnimation.active = false;
+        } else {
+          ship.vx += ax * dt;
+          ship.vy += ay * dt;
+          const damping = Math.pow(SHIP_DAMPING, dt * 60);
+          ship.vx *= damping;
+          ship.vy *= damping;
+          const speed = Math.hypot(ship.vx, ship.vy);
+          const speedLimit = keys.boost ? SHIP_MAX_SPEED * 2 : SHIP_MAX_SPEED;
+          if (speed > speedLimit) {
+            ship.vx = (ship.vx / speed) * speedLimit;
+            ship.vy = (ship.vy / speed) * speedLimit;
+          }
+          ship.x += ship.vx * dt;
+          ship.y += ship.vy * dt;
+          ship.x = clamp(ship.x, -WORLD_BOUNDS, WORLD_BOUNDS);
+          ship.y = clamp(ship.y, -WORLD_BOUNDS, WORLD_BOUNDS);
+          camera.targetZoom = 1;
         }
-        ship.x += ship.vx * dt;
-        ship.y += ship.vy * dt;
-        ship.x = clamp(ship.x, -WORLD_BOUNDS, WORLD_BOUNDS);
-        ship.y = clamp(ship.y, -WORLD_BOUNDS, WORLD_BOUNDS);
-        camera.targetZoom = 1;
       }
 
-      const targetAngle = Math.atan2(ship.vy, ship.vx);
-      if (Math.hypot(ship.vx, ship.vy) > 12) {
-        ship.angle = angleLerp(ship.angle, targetAngle, smoothing(7.5, dt));
+      if (!paused) {
+        const targetAngle = Math.atan2(ship.vy, ship.vx);
+        if (Math.hypot(ship.vx, ship.vy) > 12) {
+          ship.angle = angleLerp(ship.angle, targetAngle, smoothing(7.5, dt));
+        }
       }
 
-      const cameraFollow = smoothing(8, dt);
-      const zoomFollow = smoothing(10, dt);
-      camera.x += (ship.x - camera.x) * cameraFollow;
-      camera.y += (ship.y - camera.y) * cameraFollow;
-      camera.zoom += (camera.targetZoom - camera.zoom) * zoomFollow;
+      if (!paused) {
+        const cameraFollow = smoothing(8, dt);
+        const zoomFollow = smoothing(10, dt);
+        camera.x += (ship.x - camera.x) * cameraFollow;
+        camera.y += (ship.y - camera.y) * cameraFollow;
+        camera.zoom += (camera.targetZoom - camera.zoom) * zoomFollow;
+      }
 
       // Decouple HUD updates from render loop to reduce React-induced frame jitter.
-      hudSyncAccumulator += dt;
-      if (hudSyncAccumulator >= 0.05) {
-        setDistanceLabel(formatDistance(Math.hypot(ship.x, ship.y)));
-        setShipPosition({ x: ship.x, y: ship.y });
-        hudSyncAccumulator = 0;
+      if (!paused) {
+        hudSyncAccumulator += dt;
+        if (hudSyncAccumulator >= 0.05) {
+          setDistanceLabel(formatDistance(Math.hypot(ship.x, ship.y)));
+          setShipPosition({ x: ship.x, y: ship.y });
+          hudSyncAccumulator = 0;
+        }
       }
 
       ctx.fillStyle = "#03050a";
@@ -928,9 +956,11 @@ export function SpaceScene() {
 
       clickTargets.length = 0;
 
-      planetRuntime.forEach((planet) => {
-        planet.angle += planet.orbitSpeed * dt;
-      });
+      if (!paused) {
+        planetRuntime.forEach((planet) => {
+          planet.angle += planet.orbitSpeed * dt;
+        });
+      }
 
       const worldMap: Record<string, Vec2> = {
         sun: { x: 0, y: 0 },
@@ -952,14 +982,16 @@ export function SpaceScene() {
       distantObjects.forEach((obj) => {
         worldMap[obj.id] = obj.position;
       });
-      minimapSyncAccumulator += dt;
-      if (minimapSyncAccumulator >= 0.08) {
-        setPlanetPositions(
-          Object.fromEntries(
-            planets.map((planet) => [planet.id, worldMap[planet.id] ?? { x: planet.radius, y: 0 }])
-          ) as Record<string, Vec2>
-        );
-        minimapSyncAccumulator = 0;
+      if (!paused) {
+        minimapSyncAccumulator += dt;
+        if (minimapSyncAccumulator >= 0.08) {
+          setPlanetPositions(
+            Object.fromEntries(
+              planets.map((planet) => [planet.id, worldMap[planet.id] ?? { x: planet.radius, y: 0 }])
+            ) as Record<string, Vec2>
+          );
+          minimapSyncAccumulator = 0;
+        }
       }
 
       planetRuntime.forEach((planet) => {
@@ -1158,7 +1190,7 @@ export function SpaceScene() {
         clickTargets.push({ id: obj.id, name: obj.name, position: obj.position, radius: obj.size, info: obj.info });
       });
 
-      drawThrusterParticles(dt, accelerating);
+      drawThrusterParticles(paused ? 0 : dt, paused ? false : accelerating);
       drawShip();
 
       if (selectionRef.current) {
@@ -1214,9 +1246,11 @@ export function SpaceScene() {
           worldPosition: hit.position,
           info: hit.info,
         };
+        pausedRef.current = true;
         setSelection(selected);
         setSelectionScreenPos({ x: mouseSelectionRef!.x, y: mouseSelectionRef!.y });
       } else {
+        pausedRef.current = false;
         setSelection(null);
         setSelectionScreenPos(null);
       }
@@ -1281,7 +1315,16 @@ export function SpaceScene() {
             onReturnToSolarSystem={() => setReturnTick((prev) => prev + 1)}
           />
           {selection && selectionScreenPos && (
-            <ObjectInfoCard name={selection.name} info={selection.info} screenPosition={selectionScreenPos} />
+            <ObjectInfoCard
+              name={selection.name}
+              info={selection.info}
+              screenPosition={selectionScreenPos}
+              onClose={() => {
+                pausedRef.current = false;
+                setSelection(null);
+                setSelectionScreenPos(null);
+              }}
+            />
           )}
         </>
       )}
